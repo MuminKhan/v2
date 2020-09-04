@@ -11,7 +11,7 @@ RUN apt update && \
 
 #RUN apt install -y python3-scipy python3-matplotlib python3-numpy
 
-COPY test.py test.py
+COPY recognize_faces.py recognize_faces.py
 COPY haarcascade_frontalface_default.xml haarcascade_frontalface_default.xml
 
-CMD ["python3", "-u", "test.py"]
+CMD ["python3", "-u", "recognize_faces.py"]
