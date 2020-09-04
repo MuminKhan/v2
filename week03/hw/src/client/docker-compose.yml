@@ -1,0 +1,10 @@
+version: "3.3"
+services:
+    #mqtt:
+    #    image: eclipse-mosquitto:latest
+    face-detector:
+        build: 
+            context: ./
+            dockerfile: opencv.Dockerfile
+        devices:
+            - "/dev/video0:/dev/video0"
