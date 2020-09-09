@@ -28,5 +28,6 @@ This directory contains an application called `Facey`, only because I thought of
 * I chose to use an MQTT QoS of 1 so that collected faces are guaranteed to be delivered. I do not care that it might be more than once potentially. 
 
 
-### S3 Bucket
+### S3 Bucket Contents
 ![Collected Faces](resources/facey_s3.png)
+![Example](resources/facey_example.png)
