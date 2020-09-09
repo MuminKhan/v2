@@ -20,7 +20,7 @@ Because the context of this class is IoT, we request that you use MQTT as the me
 
 We also ask that you treat the NX as an IoT Hub.  Therefore, we ask that you install a local MQTT broker in the NX, and that your face detector sends its messages to this broker first.  Then, we ask that you write another component that receives these messages from the local broker, and sends them to the cloud [MQTT broker].
 
-In the cloud, you need to provision a lightweight virtual machine (1-2 CPUs and 2-4 G of RAM should suffice) and run an MQTT broker. As discussed above, the faces will need to be sent here as binary messages.  Another component will need to be created here to receive these binary files and save them to SoftLayer's Object storage (note that the Swift-compatible object storage is being deprecated in favor of s3-compatible object storage). 
+In the cloud, you need to provision a lightweight virtual machine (1-2 CPUs and 2-4 G of RAM should suffice) and run an MQTT broker. As discussed above, the faces will need to be sent here as binary messages.  Another component will need to be created here to receive these binary files and save them to the s3 Object storage. 
 
 
 Please don't be intimidated by this homework as it is mostly a learning experience on the building blocks. The concept of the Internet of Things deals with a large number of devices that communicate largely through messaging. Here, we have just one device and one sensor- the camera.  But, we could add a bunch more sensors like microphones, GPS, proximity sensors, lidars...
@@ -101,7 +101,8 @@ local_mqttclient.loop_forever()
 ```
 
 ## OpenCV
-[OpenCV](https://opencv.org/) is THE library for computer vision.  At the moment it has fallen behind the Deep Learning curve, but it could catch up at any moment.  For traditional, non-DL image processing, it is unmatched.
+[OpenCV](https://opencv.org/) is THE library for computer vision.  At the moment it has fallen behind the Deep Learning curve, but it could catch up at any moment.  For traditional, non-DL image processing, it is unmatched.   
+Some hints for getting started with OpenCV in a container are [here](https://github.com/rdejana/w251/tree/master/hw3), if you need them.
 
 ### Facial detection with OpenCV 
 We suggest that you use a simple pre-trained frontal face HAAR Cascade Classifier [documented here](https://docs.opencv.org/3.4.1/d7/d8b/tutorial_py_face_detection.html).  There is no need to detect eyes,just the face.  Notice how simple it is to use:
