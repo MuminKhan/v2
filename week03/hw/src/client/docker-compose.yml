@@ -6,3 +6,8 @@ services:
             dockerfile: facey-client.Dockerfile
         devices:
             - "/dev/video0:/dev/video0"
+        environment:
+            - MQTT_SERVER=54.153.5.12
+            - MQTT_PORT=1883
+            - MQTT_TOPIC=facey
+            - MQTT_QOS=1
