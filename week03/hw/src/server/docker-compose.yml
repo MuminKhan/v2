@@ -9,4 +9,6 @@ services:
         build: 
             context: ./
             dockerfile: facey-subscribe.Dockerfile
-            
+        environment:
+            s3_bucket: w251-hw3
+            s3_ket: facey

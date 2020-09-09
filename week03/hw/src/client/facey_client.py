@@ -29,7 +29,6 @@ def parse_arguments():
     arguments = parser.parse_args()
     arguments.MQTT_PORT = int(arguments.MQTT_PORT)
     arguments.MQTT_QOS = int(arguments.MQTT_QOS)
-
     
     print("Supplied args:")
     [print(k,v) for k,v in arguments.__dict__.items()]
@@ -40,7 +39,7 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
 
-    print("Begining video stream.")
+    print("Starting video stream...")
     video_capture = cv2.VideoCapture(0)
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
@@ -62,11 +61,9 @@ if __name__ == "__main__":
             print(f'Published {out_file} to {args.MQTT_SERVER}:{args.MQTT_PORT} topic: {args.MQTT_TOPIC}')
             sleep(5)
 
-        """
-        cv2.imshow('Video', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        """
-
+        #cv2.imshow('Video', frame)
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
+        
     video_capture.release()
     cv2.destroyAllWindows()
