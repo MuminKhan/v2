@@ -1,10 +1,8 @@
 version: "3.3"
 services:
-    #mqtt:
-    #    image: eclipse-mosquitto:latest
-    face-detector:
+    facey_client:
         build: 
             context: ./
-            dockerfile: opencv.Dockerfile
+            dockerfile: facey-client.Dockerfile
         devices:
             - "/dev/video0:/dev/video0"

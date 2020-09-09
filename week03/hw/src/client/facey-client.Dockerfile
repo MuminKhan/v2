@@ -7,11 +7,11 @@ RUN apt update && \
             python3-tk \ 
             libopencv-dev \
             python3-opencv \
-            python3-numpy
+            python3-numpy 
+RUN pip3 install --no-cache-dir paho-mqtt
 
-#RUN apt install -y python3-scipy python3-matplotlib python3-numpy
-
-COPY recognize_faces.py recognize_faces.py
+WORKDIR /facey
+COPY facey_client.py facey_client.py
 COPY haarcascade_frontalface_default.xml haarcascade_frontalface_default.xml
 
-CMD ["python3", "-u", "recognize_faces.py"]
+CMD ["python3", "-u", "facey_client.py"]
