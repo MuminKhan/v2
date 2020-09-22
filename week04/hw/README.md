@@ -6,21 +6,42 @@ and now the leader of the Autonomous Driving project at Tesla.  The library runs
 Our first lab aligns with the 2D classification example available here: http://cs.stanford.edu/people/karpathy/convnetjs/demo/classify2d.html
 Once you hit this page, the network starts running.  
 * Add a few red dots in previously green areas by clicking the left mouse button.  Is the network able to adjust and correctly predict the color now?
+    * Somewhat, the red dots added to the outer edge seem to be correct. The inner wones are not. 
 * Add a few green dots in previously red areas by clicking the shift left mouse button.  Can the network adapt?
+    * The network does adapt to the newly added green dots.
 * Review the network structure in the text box.  Can you name the layers and explain what they do?
+    * There's an input layer
+    * A 6 neuron fully connected layer
+    * A 2 neuron fully connected layer
+    * A final softfmax layer
 * Reduce the number of neurons in the conv layers and see how the network responds. Does it become less accurate?
+    * Yes, whhen the number of neurons is reduced, the accuracy is slightly lower
 * Increase the number of neurons and layers and cause an overfit.  Make sure you understand the concept
+    * Okay
 * Play with activation functions.. -- relu vs sigmoid vs tanh... Do you see a difference ? Relu is supposed to be faster but less accurate.
+    * They appear to be somehat the same in this example 
 
 #### 2. ConvnetJS MNIST demo
 In this lab, we will look at the processing of the MNIST data set using ConvnetJS.  This demo uses this page: http://cs.stanford.edu/people/karpathy/convnetjs/demo/mnist.html
 The MNIST data set consists of 28x28 black and white images of hand written digits and the goal is to correctly classify them.  Once you load the page, the network starts running and you can see the loss and predictions change in real time.  Try the following:
 * Name all the layers in the network, describe what they do.
+    * The network consists of: 
+        * 1 Input layer
+        * 1 convolutional layer
+        * 1 pool layer
+        * 1 convolutional layer
+        * 1 pool layer
+        * 1 softmax layer
 * Experiment with the number  and size of filters in each layer.  Does it improve the accuracy?
+    * Increasing the size improves accuracy
 * Remove the pooling layers.  Does it impact the accuracy?
+    * It appears to lower accuracy and make the execution slower
 * Add one more conv layer.  Does it help with accuracy?
+    * Adding another layer does reduce loss from about .4 to below .2, but it takes a while longer to train 
 * Increase the batch size.  What impact does it have?
+    * It appears to speed up training
 * What is the best accuracy you can achieve? Are you over 99%? 99.5%?
+    * about 96%
 
 #### 3. Build your own model in Keras
 The [Conversation AI](https://conversationai.github.io/) team, a research initiative founded by [Jigsaw](https://jigsaw.google.com/) and Google (both a part of Alphabet) are working on tools to help improve online conversation. One area of focus is the study of negative online behaviors, like toxic comments (i.e. comments that are rude, disrespectful or otherwise likely to make someone leave a discussion).   
