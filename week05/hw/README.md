@@ -1,14 +1,15 @@
 # Homework 5: TF2 and TF1
 
 ## Introduction to Tensorflow v2
-The idea of this homework is to serve as an introduction to [TensorFlow](https://www.tensorflow.org/).  TensorFlow 2 has just been GA'ed - and it is based on [Keras](https://keras.io/), which you encountered in Session 4 and (hope you agree) is much easier to use. 
+The idea of this homework is to serve as an introduction to [TensorFlow](https://www.tensorflow.org/).  TensorFlow 2 is based on [Keras](https://keras.io/), which you encountered in Session 4 and (hope you agree after reviewing section 2 of this homework) is much easier to use than Tensorflow 1. 
 
-* Start the tf2 container: `docker run --privileged --rm -p 8888:8888 -d w251/keras:dev-tx2-4.3_b132`
-* As we did before, find out associated token - e.g. note the container id and then ussue `docker logs <container_id>` and find the token.  Use it to connect to your tx2 via browser on port 8888
-* Glance through the [TF2 beginner lab](https://www.tensorflow.org/tutorials/quickstart/beginner). Download this notebook from the TF hub and upload it to your TX2 container. Run it to completion.
+* Start the tf2 container: `docker run --privileged --rm -p 8888:8888 -d w251/tensorflow:nx-dp4.4`. Note that our docker image is based on the NGC TF2 image with the addition of jupyter and a few other things.  Take a moment to review and reflect on this [docker file](https://github.com/MIDS-scaling-up/v2/blob/master/backup/tensorflow/Dockerfile.nx-dp4.4).
+* Use the password `nvidia`
+* Glance through the [TF2 beginner lab](https://www.tensorflow.org/tutorials/quickstart/beginner). Download this notebook from the TF hub and upload it to your NX container. Run it to completion.
 * What's the structure of the network that's being used for classification? How good is it? Based on what you learned in homework 4, can you beat it? Hint: use something like [this](https://github.com/dragen1860/TensorFlow-2.x-Tutorials/tree/master/01-TF2.0-Overview) if you need an inspiration.
-* Repeat for the [TF2 Quickstart lab](https://www.tensorflow.org/tutorials/images/transfer_learning_with_hub). Download / upload to TX2 and run to completion.
-* Note: you'll have to make changes to the code and fix the OOM errors.  Hint: what is your batch size?
+* Repeat for the [TF2 Quickstart lab](https://www.tensorflow.org/tutorials/images/transfer_learning_with_hub). Download / upload to NX and run to completion.
+* Remove the pip install instructions, yuo don't need them
+* Note: you'll have to make changes to the code and if you encounter the OOM errors.  Hint: what is your batch size?
 * Can you improve model accuracy? Hint: are your layers frozen?
 
 
@@ -19,7 +20,7 @@ Please try to be patient and familiarize yourself with the code of this *beginne
 
 The other concepts that we hope you will pick up are architectures for image classification as well as transfer learning.  The two go hand in hand: there are many pre-trained models today for image classification which you can further tweak (using transfer learning) on your own data. In this lab, you will see one approach where all the layers of the original model remain fixed.
 
-Note also that we are doing this homework on the TX2. It is powerful enough for real time inference - and even for incremental training.  This will come in handy later in the class as we begin to integrate neural processing into the kinds of pipelines you saw in homework 3.
+Note also that we are also doing this homework on the NX. It is powerful enough for real time inference - and even for incremental training.  This will come in handy later in the class as we begin to integrate neural processing into the kinds of pipelines you saw in homework 3.
 
 
 
@@ -28,14 +29,16 @@ In this section, we will generally follow the [Tensorflow for Poets lab](https:/
 
 Please read this before attempting the lab:
 
-* To start an interactive TensorFlow container, run `docker run --privileged --rm -p 6006:6006 -ti w251/tensorflow:dev-tx2-4.3_b132-tf1 bash`. Note the ```--rm```:  when you type `exit`, this container will be removed from your TX2.
-* You obviously don't need to install TensorFlow in the container explicitly (as the lab instructions suggest) ; it's already installed for you as a result of the Dockerfile instructions.
-* In the command above, 6006 is the port number that Tensorboard uses.  Once you launch Tensorboard (step 4), you be able to connect to the Tensorboard instance by typing http://ipaddressofyourtx2:6006
+* We are specifically staying away from jupyter here to give you a sense of what an interactive shell environment is with docker (e.g vs. conda directly on the device)
+* To start an interactive TensorFlow container, run `docker run --rm --runtime=nvidia -p 6006:6006 -ti nvcr.io/nvidia/l4t-ml:r32.4.3-py3 bash`. Note the `--rm`:  when you type `exit`, this container will be removed from your NX.
+* You  don't need to install TensorFlow in the container explicitly (as the lab instructions suggest) ; it's already installed for you as part of the image.
+* In the command above, 6006 is the port number that tensorboard uses.  To launch tensorboard (step 4), you need to do employ a little trick: `python3 /usr/local/lib/python3.6/dist-packages/tensorboard/main.py --logdir tf_files/training_summaries` and then you will be able to connect to the Tensorboard instance by typing http://ipaddressofyourNX:6006
 * Remember to use python3 instead of regular python for all commands, since as we mentioned above, Nvidia no longer provides a TensorFlow distro for python2 as python2 is dead!
+* curl isn't installed in the l4t-ml container by default, so you'll need to, e.g. `apt update && apt install -y curl`
 * Once you are inside the interactive container, proceed to clone the TF for poets repository and proceed with 3+ sections of lab. Make sure you do all of the optional sections, except the "next steps" section 9.
-* The Jetson packs a punch; make sure you run training for 4000 steps
-* When you want to make sure the container does *not* see the GPU, run it as `docker run --rm -p 6006:6006 -ti tensorflow bash`, with no privileged flag
-* On x86 based systems, Nvidia provides a tool called "nvidia-smi" to monitor GPU utilization and performance in real time.  On the Jetson, this tool is not yet supported, unfortunately.  But, the Jetpack has another tool, `/usr/bin/tegrastats`.  Its output looks like this:
+* The NX packs a punch; make sure you run training for 4000 steps
+* When you want to make sure the container does *not* see the GPU, run it as `docker run --rm -p 6006:6006 -ti nvcr.io/nvidia/l4t-ml:r32.4.3-py3 bash`, with no `--runtime=nvidia` flag
+* On x86 based systems, Nvidia provides a tool called `nvidia-smi` to monitor GPU utilization and performance in real time.  On the Jetson, this tool is not yet supported, unfortunately.  But, in addition to `jtop` that we covered earlier in class (`pip3 install jetson-stats` if you forgot), the Jetpack has another tool, `/usr/bin/tegrastats`.  Its output looks like this:
 ```
 root@tegra-ubuntu:~# tegrastats
 RAM 2586/7846MB (lfb 1x1MB) CPU [0%@960,0%@499,0%@499,0%@959,0%@960,0%@960] EMC_FREQ 10%@665 GR3D_FREQ 53%@140 APE 150 MTS fg 0% bg 0% BCPU@41C MCPU@41C GPU@39C PLL@41C Tboard@35C Tdiode@37.75C PMIC@100C thermal@40.2C VDD_IN 3177/3177 VDD_CPU 536/536 VDD_GPU 383/383 VDD_SOC 536/536 VDD_WIFI 0/0 VDD_DDR 575/575
