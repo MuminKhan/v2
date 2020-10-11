@@ -79,14 +79,14 @@ python3 labelImg.py
 
 Questions: 
 1.	In the time allowed, how many images did you annotate?  
-    * 192 images
+    * **192 images**
 2.	Home many instances of the Millennium Falcon did you annotate?  How many TIE Fighters?
-    * 141 falcons
-    * 169 tie fighters
+    * **141 falcons**
+    * **169 tie fighters**
 3.	Based on this experience,  how would you handle the annotation of large image data set?
-    * Pay someone to do it on MTurk
+    * **Pay someone to do it on MTurk**
 4.	Think about image augmentation?  How would augmentations such as flip, rotation, scale, cropping, and translation effect the annotations?
-    * It would significantly slow it down to bookkeep all the augmentations 
+    * **It would significantly slow it down to bookkeep all the augmentations**
 
 ## Part 2: Image Augmentation
 For part 2, you will need to install docker in a VM or your local workstation.  
@@ -103,24 +103,24 @@ If you wish to experiment with the augmenation library, see https://github.com/c
 Questions: 
 1. Describe the following augmentations in your own words
 -	Flip
-    * Mirrors image on either the vertical or horizontal axis
+    * **Mirrors image on either the vertical or horizontal axis**
 - 	Rotation
-    * Rotates the image by either 90, 180, or 270 degress
+    * **Rotates the image by either 90, 180, or 270 degress**
 -	Scale
-    * Enlarges or shrinks an image
+    * **Enlarges or shrinks an image**
 -	Crop
-    * Removes pixels from the outter edges
+    * **Removes pixels from the outter edges**
 -	Translation
-    * Moves the image accross the canvas
+    * **Moves the image accross the canvas**
 -	Noise
-    * Adds random RGB pixels to the image
+    * **Adds random RGB pixels to the image**
 
 ## Part 3: Audio Annotation
 Take a look at and explore the audio annotation tool CrowdCurio https://github.com/CrowdCurio/audio-annotator)
 
 Questions:
 1.	Image annotations require the coordinates of the objects and their classes; in your option, what is needed for an audio annotation? 
-    * Audio annotations will likely require timestamps or a (begin, end) timestamp pair and the classes
+    * **Audio annotations will likely require timestamps or a (begin, end) timestamp pair and the classes**
 
 
 ## What to turn  in
