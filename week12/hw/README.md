@@ -1,4 +1,4 @@
-# Homework: Part 1 - Installing GPFS FPO
+# Homework: Part 1 - Installing GPFS FPO (homework update been processed revisit after 10/31/2020)
 
 ## Overview
 
@@ -7,7 +7,44 @@ These instructions are a subset of the official instructions linked to from here
 
 We will install GPFS FPO with no replication (replication=1) and local write affinity.  This means that if you are on one of the nodes and are writing a file in GPFS, the file will end up on your local node unless your local node is out of space.
 
-A. __Get three virtual servers provisioned__, 2 vCPUs, 4G RAM, CENTOS_7_64, __two local disks__ 25G and 100G each, in any datacenter. __Make sure__ you attach a keypair.  Pick intuitive names such as gpfs1, gpfs2, gpfs3.  Note their internal (10.x.x.x) ip addresses.
+A. __Get three virtual servers provisioned__, 
+
+Use this command to pick out your default vpc, note, it is the vpc with `"IsDefault": true`.
+```
+aws ec2 describe-vpcs | grep VpcId
+```
+My one is `vpc-e4e35381`, I shall use this below. 
+
+Now create a security group which will allow us to login and expose a port for a Jupyter notebook to be run. 
+```
+aws ec2 create-security-group --group-name hw12 --description "HW12" --vpc-id vpc-e4e35381
+sg-0be9d9ccd3efee363
+
+aws ec2 authorize-security-group-ingress --group-id  sg-0be9d9ccd3efee363  --protocol tcp --port 22 --cidr 0.0.0.0/0
+```
+Now launch the ec2 instances with Centos 7 installed.
+```
+aws ec2 run-instances --image-id ami-0affd4508a5d2481b --instance-type t2.medium --security-group-ids sg-060736651d7def831 --associate-public-ip-address --key-name eariasn --count 3
+```
+
+Create 3 EBS volumes of 100GB to attach to the ec2 instances as secondary drives.
+```
+aws ec2 create-volume --volume-type gp2 --size 100 --availability-zone us-east-1a
+```
+
+Attach 1 volume per ec2 instance, so each ec2 instance would end up having two volumes (boot and external 100 GB)
+```
+aws ec2 attach-volume --volume-id vol-0ea1a75338378a24b --instance-id i-071a22957e9bbea7d --device /dev/sdf
+Notice that volume-id and instance-id would be different on each case.
+```
+
+Now log in into the ec2 instances to finish the setup:
+```
+ssh -i "eariasn.pem" centos@ec2-34-229-132-107.compute-1.amazonaws.com
+```
+
+
+2 vCPUs, 4G RAM, CENTOS_7_64, __two local disks__ 25G and 100G each, in any datacenter. __Make sure__ you attach a keypair.  Pick intuitive names such as gpfs1, gpfs2, gpfs3.  Note their internal (10.x.x.x) ip addresses.
 
 B. __Set up each one of your nodes as follows:__
 
@@ -15,16 +52,47 @@ Add to /root/.bash\_profile the following line in the end:
 
     export PATH=$PATH:/usr/lpp/mmfs/bin
 
-Make sure the nodes can talk to each other without a password.  When you created the VMs, you specified a keypair.  Copy it to /root/.ssh/id\_rsa (copy paste or scp works).  Set its permissions:
+Make sure the nodes can talk to each other without a password. Let's create ssh keys as centos user and distribute them across the nodes:
+```
+Run on each node as (confirm the defaults)
+# ssh-keygen -t rsa
 
-    chmod 600 /root/.ssh/id_rsa
+```
+Display the contents of the public part of the ssh key
+```
+# cat ~/.ssh/id_rsa.pub
 
-Set up the hosts file (/etc/hosts) for your cluster by adding the __PRIVATE__ IP addresses you noted earlier and names for each node in the cluster.  __Also__ you should remove the entry containing the fully qualified node name for your headnode / gpfs1.sftlyr.ws (otherwise it will trip up some of the GPFS tools since it likely does not resolve). For instance, your hosts file might look like this:
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOHcLvpsLtQrjPLn5CkwW6h1TAviRhCPI40y/j9/5GMYdG+F5yi65pWeWU5sM6BUKDUQK3mXdd0H7J2wLeUR7goIcpSxEV7CeJaQSdY3zc1J9yJjSBl+wABBnn16Csdp7D733wTM+fIkk9amJb0s+UKFQyUG/C centos@ip-172-31-71-181.ec2.internal
+
+```
+Copy the contents of the above into the authorized_keys files on each of the virtual servers for example:
+```
+vi ~/.ssh/authorized_keys 
+append the values of:
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOHcLvpsLtQrjPLn5CkwW6h1TAviRhCPI40y/j9/5GMYdG+F5yi65pWeWU5sM6BUKDUQK3mXdd0H7J2wLeUR7goIcpSxEV7CeJaQSdY3zc1J9yJjSBl+wABBnn16Csdp7D733wTM+fIkk9amJb0s+UKFQyUG/C centos@ip-172-31-71-181.ec2.internal
+```
+Do the same for all the 3 virtual servers so in the end you would have an authorized_keys file with 4 keys, 3 for the hw12 servers and your local key.
+
+Test that ssh connectivity between the hosts work:
+```
+ssh 3.236.224.65  (ip of another virtual server)
+should connect without password.
+```
+
+Write down the private IP address of each host (examples):
+```
+ifconfig
+172.31.71.181
+172.31.74.163
+172.31.78.146
+```
+
+Set up the hosts file (/etc/hosts) for your cluster by adding the __PRIVATE__ IP addresses and names for each node in the cluster.  __Also__ you should remove the entry containing the fully qualified node name for your headnode / gpfs1.sftlyr.ws (otherwise it will trip up some of the GPFS tools since it likely does not resolve). For instance, your hosts file might look like this:
 
     127.0.0.1 		localhost.localdomain localhost
-    10.122.6.68		gpfs1
-    10.122.6.70		gpfs2
-    10.122.6.71		gpfs3
+    172.31.71.181  gpfs1
+    172.31.74.163  gpfs2
+    172.31.78.146  gpfs3
 
 Create a nodefile.  Edit /root/nodefile and add the names of your nodes.  This is a very simple example with just one quorum node:
 
