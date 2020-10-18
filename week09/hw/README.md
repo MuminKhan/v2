@@ -113,24 +113,43 @@ Please submit the nohup.out file along with screenshots of your Tensorboard indi
 * Do you think your model is fully trained? How can you tell?
     * **Yes, eval_loss and Loss_Optimization have reached an asymptote**
 * Were you overfitting?
-    * ** **
+    * **No, it seems the end BLEU score is reasonable**
 * Were your GPUs fully utilized?
-    * ** **
+    * **I don't think so, as there was a lot of inter-node communication.**
 * Did you monitor network traffic (hint:  ```apt install nmon ```) ? Was network the bottleneck?
-    * **No, I didn't.**
+    * **Yes, the bottleneck seemed to be outward communication. That's probably sending data to the other nodes**
 * Take a look at the plot of the learning rate and then check the config file.  Can you explan this setting?
     * **Learning rate is 2.0 in the config file. I think it's supposed to reach a learning rate asymptote of 2.000e-4.**
 * How big was your training set (mb)? How many training lines did it contain?
-    * ** **
+    * **`train.clean.en.shuffled.BPE_common.32K.tok` is 915Mb. It contains 4524868 lines.**
 * What are the files that a TF checkpoint is comprised of?
     * **A TF checkpoint is comprised of the followign files: .data-\*, .index, .meta**
 * How big is your resulting model checkpoint (mb)?
-    * ** **
+    * **`data/en-de-transformer/best_models/checkpoint` is 0.004Mb**
 * Remember the definition of a "step". How long did an average step take?
     * **The average step took about 1.116 seconds**
 * How does that correlate with the observed network utilization between nodes?
-    * ** **
+    * **The bulk of the time seems to correlate with data being sent to the nodes.**
 
+#### nohup.out
+```
+[ip-172-31-3-240:27604] WARNING: local probe returned unhandled shell:unknown assuming bash
+rm: cannot remove '/lib': Is a directory
+rm: cannot remove '/lib': Is a directory
+python: can't open file 'run.py': [Errno 2] No such file or directory
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+python: can't open file 'run.py': [Errno 2] No such file or directory
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[3895,1],0]
+  Exit code:    2
+--------------------------------------------------------------------------
+```
 
 #### Tensorboard Screenshot
 ![tensorboard](hw9_tb_screenshot.png)
