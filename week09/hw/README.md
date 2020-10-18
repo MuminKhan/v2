@@ -109,16 +109,31 @@ Bonus points, explore to mount the directories permanently with FSTAB.
 
 Please submit the nohup.out file along with screenshots of your Tensorboard indicating training progress (Blue score, eval loss) over time.  Also, answer the following (simple) questions:
 * How long does it take to complete the training run? (hint: this session is on distributed training, so it *will* take a while)
+    * **15 hours 32 minutes**
 * Do you think your model is fully trained? How can you tell?
+    * **Yes, eval_loss and Loss_Optimization have reached an asymptote**
 * Were you overfitting?
+    * ** **
 * Were your GPUs fully utilized?
+    * ** **
 * Did you monitor network traffic (hint:  ```apt install nmon ```) ? Was network the bottleneck?
+    * **No, I didn't.**
 * Take a look at the plot of the learning rate and then check the config file.  Can you explan this setting?
+    * **Learning rate is 2.0 in the config file. I think it's supposed to reach a learning rate asymptote of 2.000e-4.**
 * How big was your training set (mb)? How many training lines did it contain?
+    * ** **
 * What are the files that a TF checkpoint is comprised of?
+    * **A TF checkpoint is comprised of the followign files: .data-\*, .index, .meta**
 * How big is your resulting model checkpoint (mb)?
+    * ** **
 * Remember the definition of a "step". How long did an average step take?
+    * **The average step took about 1.116 seconds**
 * How does that correlate with the observed network utilization between nodes?
+    * ** **
+
+
+#### Tensorboard Screenshot
+![tensorboard](hw9_tb_screenshot.png)
 
 ### Hints
 Your BLEU TB plot should look something like this:
