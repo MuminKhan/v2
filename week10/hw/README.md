@@ -10,3 +10,6 @@ Please access the following notebook: [DQN](https://github.com/MIDS-scaling-up/v
 
 Document your results, Please upload your training videos to ISVC.
 
+## Submission
+[Random Agent video](random-agent.mp4)  
+[Trained Agent video](trained-agent.mp4)
