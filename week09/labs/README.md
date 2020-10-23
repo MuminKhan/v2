@@ -2,32 +2,14 @@
 
 ### Inference using a trained Machine Translation model
 
-On your Jetson TX2, start an OpenSeq2Seq docker container in interactive mode:
+On your Jetson NX, start an OpenSeq2Seq docker container in interactive mode:
 ```
 # start your docker image
 # also, assuming your external hard drive is mounted in /data, pass it through using -v
-docker run --privileged --name seq -v /data:/data -p 8888:8888 -ti w251/openseq2seq:dev-tx2-4.2.1_b97 bash
+docker run --privileged --name seq -v /data:/data -p 8888:8888 -ti w251/openseq2seq:dev-nx-r32.4.3-py3 bash
 ```
 
-As of 6/29/2020, we still need to patch file open statements in  tokenizer_wrapper.py (sigh) like so:
-```
-# all occurrences, both 'r' and 'w', add encoding="utf-8", e.g.
-with open(input_file1, 'r', encoding="utf-8")
-```
 
-My steps (I chose to use vi). I found 8 instances of the open command:
-```
-apt-get update --fix-missing
-apt-get install vim
-vi /OpenSeq2Seq/tokenizer_wrapper.py
-```
-
-While you are at it, apply the same patch to `/OpenSeq2Seq/open_seq2seq/data/text2text/text2text.py` (there is only one instance in this file). (sigh)
-
-And one more patch in `/OpenSeq2Seq/open_seq2seq/utils/utils.py`. In the def deco_print() method, replace the else with:
-```
-    print((start + " " * offset + line).encode('utf-8'), end=end)
-```
 
 If you like completeless, you can now download the entire en-de corpus.  Hint: it will take a while:
 ```
@@ -72,6 +54,8 @@ Now, we should be able to run the inference!
 cd /OpenSeq2Seq
 python3 run.py --config_file=example_configs/text2text/en-de/transformer-base.py --mode=infer --infer_output_file=raw.txt --num_gpus=1
 ```
+If you have OOM errors, run our trusty [flush_buffers.sh](https://github.com/MIDS-scaling-up/v2/blob/master/week05/hw/flush_buffers.sh) script (as root)
+
 Note the output of the inference is tokenized, so we must detokenize it:
 ```
 python3 tokenizer_wrapper.py --mode=detokenize --model_prefix=/data/wmt16_de_en/m_common --decoded_output=result.txt --text_input=raw.txt
@@ -94,5 +78,5 @@ python3 tokenizer_wrapper.py --mode=detokenize --model_prefix=/data/wmt16_de_en/
 ### Notes
 * This language to language translation model is generic: it does not care which languages are used, or whether in fact these are languages at all.  It just learns to convert between pairs of strings.  It could be used to train a simple chatbot, for instance
 * You can add any other language to the model, just add the data prep instructions and issue a pull request into OpenSeq2Seq
-* Inference time is about 4-5 seconds (batch size 1)  on a TX2
+* Inference time is about 2-3 seconds (batch size 1)  on a NX
 
