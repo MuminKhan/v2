@@ -1,4 +1,4 @@
-# Homework: Part 1 - Installing GPFS FPO (homework update been processed revisit after 10/31/2020)
+# Homework: Part 1 - Installing GPFS FPO 
 
 ## Overview
 
@@ -15,19 +15,21 @@ aws ec2 describe-vpcs | grep VpcId
 ```
 My one is `vpc-e4e35381`, I shall use this below. 
 
-Now create a security group which will allow us to login and expose a port for a Jupyter notebook to be run. 
+Now create a security group which will allow us to login. 
 ```
 aws ec2 create-security-group --group-name hw12 --description "HW12" --vpc-id vpc-e4e35381
 sg-0be9d9ccd3efee363
 
 aws ec2 authorize-security-group-ingress --group-id  sg-0be9d9ccd3efee363  --protocol tcp --port 22 --cidr 0.0.0.0/0
+
 ```
+Using the AWS Console for inbound rules in the security group add a rule for ALL ICMP- IPV4 with a port range ALL and custom source 0.0.0.0/0 .
 Now launch the ec2 instances with Centos 7 installed.
 ```
-aws ec2 run-instances --image-id ami-0affd4508a5d2481b --instance-type t2.medium --security-group-ids sg-060736651d7def831 --associate-public-ip-address --key-name eariasn --count 3
+aws ec2 run-instances --image-id ami-0affd4508a5d2481b --instance-type t2.medium --security-group-ids sg-060736651d7def831 --associate-public-ip-address -block-device-mapping 'DeviceName=/dev/sda1,Ebs={VolumeSize=32}' --key-name eariasn --count 3
 ```
 
-Create 3 EBS volumes of 100GB to attach to the ec2 instances as secondary drives.
+Create 3 EBS volumes of 100GB to attach to the ec2 instances as secondary drives. (notice the availability zone of your instances, volumes should be in the same)
 ```
 aws ec2 create-volume --volume-type gp2 --size 100 --availability-zone us-east-1a
 ```
@@ -44,9 +46,12 @@ ssh -i "eariasn.pem" centos@ec2-34-229-132-107.compute-1.amazonaws.com
 ```
 
 
-2 vCPUs, 4G RAM, CENTOS_7_64, __two local disks__ 25G and 100G each, in any datacenter. __Make sure__ you attach a keypair.  Pick intuitive names such as gpfs1, gpfs2, gpfs3.  Note their internal (10.x.x.x) ip addresses.
-
 B. __Set up each one of your nodes as follows:__
+
+Switch to root user after you login:
+```
+sudo su
+```
 
 Add to /root/.bash\_profile the following line in the end:
 
@@ -87,18 +92,24 @@ ifconfig
 172.31.78.146
 ```
 
-Set up the hosts file (/etc/hosts) for your cluster by adding the __PRIVATE__ IP addresses and names for each node in the cluster.  __Also__ you should remove the entry containing the fully qualified node name for your headnode / gpfs1.sftlyr.ws (otherwise it will trip up some of the GPFS tools since it likely does not resolve). For instance, your hosts file might look like this:
+Set up the hosts file (/etc/hosts) for your cluster by adding the __PRIVATE__ IP addresses and names for each node in the cluster.). For instance, your hosts file might look like this:
 
     127.0.0.1 		localhost.localdomain localhost
     172.31.71.181  gpfs1
     172.31.74.163  gpfs2
     172.31.78.146  gpfs3
+Try to connect with ssh from each host using the short name we added to the hosts file:
+```
+ssh root@gpfs1
+ssh root@gpfs2
+ssh root@gpfs3
+```
+All should connect without asking for password.
 
 Create a nodefile.  Edit /root/nodefile and add the names of your nodes.  This is a very simple example with just one quorum node:
-
-    gpfs1:quorum:
-    gpfs2::
-    gpfs3::
+gpfs1:quorum:
+gpfs2::
+gpfs3::
 
 C. __Install and configure GPFS FPO on each node:__
 Install pre-requisites
@@ -120,12 +131,12 @@ curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
 yum install unzip
 unzip awscli-bundle.zip
 sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
-aws configure
+/usr/local/bin/aws configure
 Access Key ID:
 A1XGdUexhlIdyusn16Jh
 Secret Access Key:
 vImKKsEPfYQuzovEuPZjabeAViRhdQ9P85RQJEt1
-aws --endpoint-url=https://s3-api.us-geo.objectstorage.softlayer.net  s3 cp s3://homework12/Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install
+/usr/local/bin/aws --endpoint-url=https://s3-api.us-geo.objectstorage.softlayer.net  s3 cp s3://homework12/Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install
 
 ```
 
@@ -150,7 +161,7 @@ Now the cluster is installed, let's work the details.
 
 Now, you must accept the license:
 
-    mmchlicense server -N all (this command needs to be run just gpfs1)
+     /usr/lpp/mmfs/bin/mmchlicense sever -N all (this command needs to be run just gpfs1)
     # (say yes)
 
 Now, start GPFS:
@@ -174,7 +185,7 @@ Now we need to define our disks. Do this to print the paths and sizes of disks o
 Note the names of your 100G disks. Here's what I see:
 
     [root@gpfs1 ras]# fdisk -l |grep Disk |grep bytes
-    Disk /dev/xvdc: 100 GiB, 107374182400 bytes, 209715200 sectors
+    Disk /dev/xvdf: 107.4 GB, 107374182400 bytes, 209715200 sectors
     Disk /dev/xvdb: 2 GiB, 2147483648 bytes, 4194304 sectors
     Disk /dev/xvda: 25 GiB, 26843701248 bytes, 52429104 sectors
 
@@ -183,7 +194,7 @@ Now inspect the mount location of the root filesystem on your boxes:
     [root@gpfs1 ras]# mount | grep ' \/ '
     /dev/xvda2 on / type ext3 (rw,noatime)
 
-Disk /dev/xvda (partition 2) is where my operating system is installed, so I'm going to leave it alone.  In my case, __xvdc__ is my 100 disk.  In your case, it could be /dev/xvdb, so __please be careful here__.  Assuming your second disk is `/dev/xvdc` then add these lines to `/root/diskfile.fpo`:
+Disk /dev/xvda (partition 2) is where my operating system is installed, so I'm going to leave it alone.  In my case, __xvdf__ is my 100 disk.  In your case, it could be /dev/xvdb, so __please be careful here__.  Assuming your second disk is `/dev/xvdf` then add these lines to `/root/diskfile.fpo`:
 
     %pool:
     pool=system
@@ -191,21 +202,21 @@ Disk /dev/xvda (partition 2) is where my operating system is installed, so I'm g
     writeAffinityDepth=1
 
     %nsd:
-    device=/dev/xvdc
+    device=/dev/xvdf
     servers=gpfs1
     usage=dataAndMetadata
     pool=system
     failureGroup=1
 
     %nsd:
-    device=/dev/xvdc
+    device=/dev/xvdf
     servers=gpfs2
     usage=dataAndMetadata
     pool=system
     failureGroup=2
 
     %nsd:
-    device=/dev/xvdc
+    device=/dev/xvdf
     servers=gpfs3
     usage=dataAndMetadata
     pool=system
