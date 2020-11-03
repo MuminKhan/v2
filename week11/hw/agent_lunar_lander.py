@@ -27,11 +27,20 @@ class DQN:
 
         #######################
         # Change these parameters to improve performance
+        """
+        # Default
         self.density_first_layer = 16
         self.density_second_layer = 8
         self.num_epochs = 1
         self.batch_size = 64
         self.epsilon_min = 0.01
+        """
+        self.density_first_layer = 512
+        self.density_second_layer = 256
+        self.num_epochs = 1
+        self.batch_size = 64
+        self.epsilon_min = 0.01
+
 
         # epsilon will randomly choose the next action as either
         # a random action, or the highest scoring predicted action
@@ -40,7 +49,7 @@ class DQN:
         self.gamma = 0.99
 
         # Learning rate
-        self.lr = 0.001
+        self.lr = 0.002
 
         #######################
 
@@ -49,7 +58,6 @@ class DQN:
         self.replay_memory_buffer = deque(maxlen=500000)
         self.num_action_space = self.action_space.n
         self.num_observation_space = env.observation_space.shape[0]
-
 
         self.model = self.initialize_model()
 
@@ -153,9 +161,10 @@ class DQN:
             done = False
             state = np.reshape(state, [1, self.num_observation_space])
             while not done:
-                frame = env.render(mode='rgb_array')
+                #frame = env.render(mode='rgb_array')
 
                 if episode % 10 == 0:
+                    frame = env.render(mode='rgb_array')
                     frames.append(frame)                    
 
 

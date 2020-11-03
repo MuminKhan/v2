@@ -125,21 +125,62 @@ Upload all the videos to Cloud Object Storage and provide links using the instru
 
 Submit a write-up of the tweaks you made to the model and the effect they had on the results. 
 Questions to answer:
-1) What parameters did you change, and what values did you use? 
-2) Whhy did you change these parameters?
-3) Did you try any other changes (like adding layers or changing the epsilon value) that made things better or worse?
-4) Did your changes improve or degrade the model? How close did you get to a test run with 100% of the scores above 200?
-5) Based on what you observed, what conclusions can you draw about the different parameters and their values? 
-6) What is the purpose of the epsilon value?
-7) Describe "Q-Learning".
+
+1. What parameters did you change, and what values did you use?  
+    * The final parameters are as follows: 
+```
+self.density_first_layer = 512
+self.density_second_layer = 256
+self.num_epochs = 1
+self.batch_size = 64
+self.lr = 0.002
+```
+2. Why did you change these parameters?  
+    * I changed the layer densities because less dense models were not converging on a solution. I changed the learning rate to try to optimize the number of simulations required to fully train the model. 
+3. Did you try any other changes (like adding layers or changing the epsilon value) that made things better or worse?  
+    * I tried adding another layer, it made the model a lot slower without adding much performance.
+4. Did your changes improve or degrade the model? How close did you get to a test run with 100% of the scores above 200?  
+    * I only made one change at a time, and usually it was either a small gain or inconclusive boost. The final model was kind of a mixed bag with 40% over 200.
+5. Based on what you observed, what conclusions can you draw about the different parameters and their values?   
+    * Generally, the parameters I tuned were a bit up to chance. I was looking to get a "perfect storm" of parameters to optimize the training process. I think the most effective change was increasing the number of layers.
+6. What is the purpose of the epsilon value?  
+    * Epsilon will randomly choose the next action as either a random action, or the highest scoring predicted action (agent_lunar_lander.py, line 45-46).
+7. Describe "Q-Learning"  
+    * Q-Learning refers to a reinforcement learning algorithm in which the function Q(s,a), where s is the `state` and a is the `action`, is maximized to provide an action to take. 
 
 ## Grading is based on the changes made and the observed output, not on the accuracy of the model.
 
 We will compare results in class. The biggest Average Reward after the test run "wins":
 
+### Results:
 ```
-Average Reward:  243.09916996497867
+Average Reward:  216.37818461312054
+Total tests above 200:  80
+
+real	112m40.183s
+user	0m1.224s
+sys	0m0.984s
 ```
+
+#### Videos
+[episode50.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/episode50.mp4)  
+[episode200.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/episode200.mp4)  
+[episode300.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/episode300.mp4)  
+[episode400.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/episode400.mp4)  
+[episode500.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/episode500.mp4)  
+[episode550.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/episode550.mp4)  
+[testing_run0.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run0.mp4)  
+[testing_run10.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run10.mp4)  
+[testing_run20.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run20.mp4)  
+[testing_run30.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run30.mp4)  
+[testing_run40.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run40.mp4)  
+[testing_run50.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run50.mp4)  
+[testing_run60.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run60.mp4)  
+[testing_run70.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run70.mp4)  
+[testing_run80.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run80.mp4)  
+[testing_run90.mp4](https://mmkhan-w251.s3-us-west-2.amazonaws.com/apollo/testing_run90.mp4)  
+
+
 
 #### Enable http access to Cloud Object Storage
 
@@ -151,3 +192,4 @@ Here's how to enable http access to the S3 COS using the AWS console:
 4) Finish the bucket creation
 5) Upload your file. Once uploaded, click on the file and get the Object URL. This is the URL to submit with your homework.
 ```
+
