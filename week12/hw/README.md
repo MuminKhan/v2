@@ -11,38 +11,57 @@ A. __Get three virtual servers provisioned__,
 
 Use this command to pick out your default vpc, note, it is the vpc with `"IsDefault": true`.
 ```
-aws ec2 describe-vpcs | grep VpcId
+aws ec2 describe-vpcs | grep -B20 "IsDefault\": true" | grep VpcId
 ```
-My one is `vpc-e4e35381`, I shall use this below. 
+
+If you do not see a VpcId listed, try `aws ec2 describe-vpcs | grep VpcId`
+
+My default VPC is `vpc-e4e35381`, I shall use this below. 
 
 Now create a security group which will allow us to login. 
 ```
 aws ec2 create-security-group --group-name hw12 --description "HW12" --vpc-id vpc-e4e35381
-sg-0be9d9ccd3efee363
+```
 
-aws ec2 authorize-security-group-ingress --group-id  sg-0be9d9ccd3efee363  --protocol tcp --port 22 --cidr 0.0.0.0/0
+You should see output similar to this:
+```
+{
+     "GroupId": "sg-0be9d9ccd3efee363"
+}
+```
+
+Now allow ingress on port 22 and for ping:
 
 ```
-Using the AWS Console for inbound rules in the security group add a rule for ALL ICMP- IPV4 with a port range ALL and custom source 0.0.0.0/0 .
+aws ec2 authorize-security-group-ingress --group-id sg-YOUR_SG_ID  --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-id sg-YOUR_SG_ID --ip-permissions IpProtocol=icmp,FromPort=-1,ToPort=-1,IpRanges=[{CidrIp=0.0.0.0/0}]
+aws ec2 authorize-security-group-ingress --group-id sg-YOUR_SG_ID  --protocol tcp --port 0-65535 --cidr 0.0.0.0/0
+```
 Now launch the ec2 instances with Centos 7 installed.
 ```
-aws ec2 run-instances --image-id ami-0affd4508a5d2481b --instance-type t2.medium --security-group-ids sg-060736651d7def831 --associate-public-ip-address -block-device-mapping 'DeviceName=/dev/sda1,Ebs={VolumeSize=32}' --key-name eariasn --count 3
+aws ec2 run-instances --image-id ami-0affd4508a5d2481b --instance-type t2.medium --security-group-ids sg-YOUR_SG_ID --associate-public-ip-address --block-device-mapping 'DeviceName=/dev/sda1,Ebs={VolumeSize=32}' --key-name eariasn --count 3
 ```
 
-Create 3 EBS volumes of 100GB to attach to the ec2 instances as secondary drives. (notice the availability zone of your instances, volumes should be in the same)
+Create 3 EBS volumes of 100GB to attach to the ec2 instances as secondary drives by running the `create-volume` command three times:
+
 ```
 aws ec2 create-volume --volume-type gp2 --size 100 --availability-zone us-east-1a
 ```
+**NOTE: The availability zone can be found by running:**
+`aws ec2 describe-instances | grep AvailabilityZone`
+
 
 Attach 1 volume per ec2 instance, so each ec2 instance would end up having two volumes (boot and external 100 GB)
 ```
-aws ec2 attach-volume --volume-id vol-0ea1a75338378a24b --instance-id i-071a22957e9bbea7d --device /dev/sdf
-Notice that volume-id and instance-id would be different on each case.
+aws ec2 attach-volume --volume-id vol-YOUR_VOLUME_ID --instance-id i-YOUR_INSTANCE_ID --device /dev/sdf
 ```
+
+**Notice that volume-id and instance-id would be different on each case.**
+
 
 Now log in into the ec2 instances to finish the setup:
 ```
-ssh -i "eariasn.pem" centos@ec2-34-229-132-107.compute-1.amazonaws.com
+ssh -i "YOUR_KEY.pem" centos@YOUR_PUBLIC_DNS_NAME
 ```
 
 
@@ -50,49 +69,46 @@ B. __Set up each one of your nodes as follows:__
 
 Switch to root user after you login:
 ```
-sudo su
+sudo su -
 ```
 
 Add to /root/.bash\_profile the following line in the end:
 
     export PATH=$PATH:/usr/lpp/mmfs/bin
 
-Make sure the nodes can talk to each other without a password. Let's create ssh keys as centos user and distribute them across the nodes:
+Make sure the nodes can talk to each other without a password. Let's create ssh keys as centos user and distribute them across the nodes. Ensure that you accept the defaults (and do not set a passphrase):
 ```
-Run on each node as (confirm the defaults)
-# ssh-keygen -t rsa
+[root@ip-172-31-70-9 ~]# ssh-keygen -t rsa
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
 
 ```
-Display the contents of the public part of the ssh key
+Add the new public key to the authorized_keys file:
 ```
 # cat ~/.ssh/id_rsa.pub
 
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOHcLvpsLtQrjPLn5CkwW6h1TAviRhCPI40y/j9/5GMYdG+F5yi65pWeWU5sM6BUKDUQK3mXdd0H7J2wLeUR7goIcpSxEV7CeJaQSdY3zc1J9yJjSBl+wABBnn16Csdp7D733wTM+fIkk9amJb0s+UKFQyUG/C centos@ip-172-31-71-181.ec2.internal
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOHcLvpsLtQrjPLn5CkwW6h1TAviRhCPI40y/j9/5GMYdG+F5yi65pWeWU5sM6BUKDUQK3mXdd0H7J2wLeUR7goIcpSxEV7CeJaQSdY3zc1J9yJjSBl+wABBnn16Csdp7D733wTM+fIkk9amJb0s+UKFQyUG/C centos@ip-YOUR_IP_ADDRESS.ec2.internal
 
 ```
-Copy the contents of the above into the authorized_keys files on each of the virtual servers for example:
+Copy the contents of the above into the authorized_keys files on **each of the virtual servers**, for example:
 ```
 vi ~/.ssh/authorized_keys 
 append the values of:
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOHcLvpsLtQrjPLn5CkwW6h1TAviRhCPI40y/j9/5GMYdG+F5yi65pWeWU5sM6BUKDUQK3mXdd0H7J2wLeUR7goIcpSxEV7CeJaQSdY3zc1J9yJjSBl+wABBnn16Csdp7D733wTM+fIkk9amJb0s+UKFQyUG/C centos@ip-172-31-71-181.ec2.internal
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOHcLvpsLtQrjPLn5CkwW6h1TAviRhCPI40y/j9/5GMYdG+F5yi65pWeWU5sM6BUKDUQK3mXdd0H7J2wLeUR7goIcpSxEV7CeJaQSdY3zc1J9yJjSBl+wABBnn16Csdp7D733wTM+fIkk9amJb0s+UKFQyUG/C centos@YOUR_IP_ADDRESS.ec2.internal
 ```
-Do the same for all the 3 virtual servers so in the end you would have an authorized_keys file with 4 keys, 3 for the hw12 servers and your local key.
+**Do the same for all the 3 virtual servers so in the end you would have an authorized_keys file with 4 keys, 3 for the hw12 servers and your local key.**
 
-Test that ssh connectivity between the hosts work:
+Test that ssh connectivity between the hosts work. You should be able to ssh between any two nodes without a password. **THIS IS A KEY TEST**:
 ```
-ssh 3.236.224.65  (ip of another virtual server)
-should connect without password.
+ssh IP_ADDRESS_OF_ANOTHER_SERVER
 ```
+You can get the IP address for a server by running `ifconfig eth0 | grep inet | grep -v inet6 | awk '{print $2}'`
 
-Write down the private IP address of each host (examples):
-```
-ifconfig
-172.31.71.181
-172.31.74.163
-172.31.78.146
-```
-
-Set up the hosts file (/etc/hosts) for your cluster by adding the __PRIVATE__ IP addresses and names for each node in the cluster.). For instance, your hosts file might look like this:
+Modify the hosts file (/etc/hosts) for **each of the three nodes** in your cluster by adding all three the IP addresses and a name. For instance, your hosts file should look similar to this (but with different IP addresses):
 
     127.0.0.1 		localhost.localdomain localhost
     172.31.71.181  gpfs1
@@ -106,29 +122,29 @@ ssh root@gpfs3
 ```
 All should connect without asking for password.
 
-Create a nodefile.  Edit /root/nodefile and add the names of your nodes.  This is a very simple example with just one quorum node:
+Create a nodefile on gpfs1.  Create /root/nodefile and add the names of your nodes.  This is a very simple example with just one quorum node:
+```
 gpfs1:quorum:
 gpfs2::
 gpfs3::
+```
 
 C. __Install and configure GPFS FPO on each node:__
-Install pre-requisites
+Install pre-requisites on each node
 ```
 #update the kernel & install some pre-reqs
 yum install -y kernel-devel g++ gcc cpp kernel-headers gcc-c++ 
 yum update
 #reboot to use the latest kernel
 reboot
-#install more pre-reqs
-yum install -y ksh perl libaio m4 net-tools
+#after reboot completes, log back in as root and install more pre-reqs
+yum install -y ksh perl libaio m4 net-tools unzip
 
 ```
-Then install S3 API client and GPFS with:
+Then install S3 API client on `gpfs1` and download the GPFS install package (ensure that you use the shared Access Key and not your own credentials):
 
-S3 Client
 ```
 curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-yum install unzip
 unzip awscli-bundle.zip
 sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 /usr/local/bin/aws configure
@@ -138,30 +154,34 @@ Secret Access Key:
 vImKKsEPfYQuzovEuPZjabeAViRhdQ9P85RQJEt1
 /usr/local/bin/aws --endpoint-url=https://s3-api.us-geo.objectstorage.softlayer.net  s3 cp s3://homework12/Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install
 
+# copy the file to the other nodes
+scp Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install gpfs2:~
+scp Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install gpfs3:~
+
 ```
 
 GPFS installation (node that we are adding nodes using the node names, be sure to update the hosts file on each VM)
 ```
 chmod +x Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install
-./Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install --silent  (this command needs to be run on every node)
-/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale node add gpfs1  (this command needs to be run just gpfs1)
-/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale node add gpfs2  (this command needs to be run just gpfs1)
-/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale node add gpfs3  (this command needs to be run just gpfs1)
+./Spectrum_Scale_Standard-5.0.5.0-x86_64-Linux-install --silent  #(this command needs to be run on every node)
+/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale node add gpfs1  #(this command needs to be run just gpfs1)
+/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale node add gpfs2  #(this command needs to be run just gpfs1)
+/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale node add gpfs3  #(this command needs to be run just gpfs1)
 
 ```
 
 
 D. __Create the cluster.  Do these steps only on one node (gpfs1 in my example).__
 ```
-/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale setup -s IP-OF-GPFS1  (this command needs to be run just gpfs1)
-/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale callhome disable   (this command needs to be run just gpfs1)
-/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale install  (this command needs to be run just gpfs1)
+/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale setup -s IP-ADDRESS-OF-GPFS1  #(this command needs to be run just gpfs1)
+/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale callhome disable   #(this command needs to be run just gpfs1)
+/usr/lpp/mmfs/5.0.5.0/installer/spectrumscale install  #(this command needs to be run just gpfs1)
 ```
 Now the cluster is installed, let's work the details.
 
 Now, you must accept the license:
 
-     /usr/lpp/mmfs/bin/mmchlicense sever -N all (this command needs to be run just gpfs1)
+     /usr/lpp/mmfs/bin/mmchlicense sever -N all #(this command needs to be run just gpfs1)
     # (say yes)
 
 Now, start GPFS:
