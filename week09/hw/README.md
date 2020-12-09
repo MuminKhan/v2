@@ -4,7 +4,7 @@
 ###
 This homework requires the limit of VCPU for your AWS account to be raised to 32, so before starting to work on this create a ticket to request the limit increase, use a Service limit increase type of case and add the following explanation for the description:
 
-**Please update the limit for VCPU on my account to be 32, we are currently running a graded homework in our class at UC Berkeley for the Master in Data Science program about training a Transformer-based Machine Translation network on a small English to German WMT corpus and it uses distributed computing across 4 EC2 instances.**
+**Please update the limit for VCPU on my account to be 32 for the g4dn.2xlarge instance type. We are currently running a graded homework in our class at UC Berkeley for the Master in Data Science program about training a Transformer-based Machine Translation network on a small English to German WMT corpus and it uses distributed computing across 4 EC2 instances.**
  
 **Without the limit update one of our instructions has the following error:
 An error occurred (VcpuLimitExceeded) when calling the RunInstances operation: You have requested more vCPU capacity than your current vCPU limit of 8 allows for the instance bucket that the specified instance type belongs to. Please visit http://aws.amazon.com/contact-us/ec2-request to request an adjustment to this limit.**
@@ -60,7 +60,7 @@ Now we login,
 ssh -i "darraghaws.pem" ubuntu@ec2-54-194-227-21.eu-west-1.compute.amazonaws.com
 ```
 
-You will need to create an AWS Elastic File Storage Service (EFS) instance and mount it on all nodes (e.g. under /data)
+You will need to create an AWS Elastic File Storage Service (EFS) instance and mount it on all nodes (e.g. under ~/data)
 
 
 ### EFS volume and mount target creation
@@ -75,6 +75,11 @@ Get the IP address, notice that your EC2 subnet id and security group id would b
 ### EC2 instance volume mount operation.
 Notice the ip address is going to be different from this example.
 ```
+## These first three steps are to bring the docker file in to your home directory. 
+# cd ~
+# git clone https://github.com/MIDS-scaling-up/v2.git
+# cp -r v2/week09/hw/docker .
+# mkdir ~/data
 # sudo mount -t nfs -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 172.31.67.44:/ ~/data
 # cd ~/data
 # sudo chmod go+rw .

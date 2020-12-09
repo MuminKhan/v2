@@ -1,36 +1,49 @@
 # Homework 13: Deep Learning SDK (the unofficial one, by Dustin Franklin)
 
-We find that Dusty's repo has been one of the best places to find cool examples and cool code for doing something practical, so hopefully you'll enjoy it as well.  In this homework, you'll be using transfer learning to create a model that classifies plants, directly on your TX2!
+We find that Dusty's repo has been one of the best places to find cool examples and cool code for doing something practical, so hopefully you'll enjoy it as well.  In this homework, you'll be using transfer learning to create a model that classifies plants, directly on your Jetson!
 
-## Setting up
+## Set up your default Docker runtime to Nvidia
+Edit /etc/docker/daemon.json and add `"default-runtime": "nvidia"`
+```
+{
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    },
 
-* Review the [github repo](https://github.com/dusty-nv/jetson-inference)
-* Review the Docker file (Dockerfile.inf) required the build the container
-* Try building on the TX2, e.g. ``` docker build -t inf -f Dockerfile.inf .``` This will take a few minutes.
-* Start the container in interactive mode, e.g.
+    "default-runtime": "nvidia"
+}
 ```
-# this needs to be done on the jetson
-xhost +
-docker run --rm --privileged -v /tmp:/tmp -v /data:/data -v /var:/var -v /home/nvidia/models:/models --net=host --ipc=host --env DISPLAY=$DISPLAY -ti w251/inf:dev-tx2-4.3_b132 bash
+Now restart docker, e.g. `service docker restart`
+
+## Set up and build the docker image
+Review Dusty's [github repo](https://github.com/dusty-nv/jetson-inference), then build the container:
+```bash
+$ git clone --recursive https://github.com/dusty-nv/jetson-inference
+$ cd jetson-inference
+$ docker/build.sh
 ```
-* Pytorch and torchvision should already be installed for you, just make sure you use python3 for all commands instead of regular python (which points to python2)
-* Swap should also be already set up for you ( we did this in homework 1)
+
+## Start the runtime
+Assuming we have the image built, let's start it!
+```bash
+$ docker/run.sh
+```
 
 ## Training the model
-We suggest that you generally follow [these instructions](https://github.com/dusty-nv/jetson-inference/blob/master/docs/pytorch-plants.md) to train ResNet-18 on the PlantCLEF dataset.  Just a few notes:
-* Review the [train script](https://github.com/dusty-nv/pytorch-imagenet/blob/master/train.py)
+We suggest that you loosely follow [these instructions](https://github.com/dusty-nv/jetson-inference/blob/master/docs/pytorch-plants.md) to train at least two networks: ResNet13 and Wide ResNet 50-2 on the PlantCLEF dataset.  Just a few notes:
+* Review the [repo](https://github.com/dusty-nv/pytorch-classification) and the [train script](https://github.com/dusty-nv/pytorch-imagenet/blob/master/train.py)
+* Please use [the original pytorch example script](https://github.com/pytorch/examples/blob/master/imagenet/main.py) for training as it is more up to date
 * Once again, please use python3 for all commands
-* Note that in the instructions above, you passed through /data to your container.  Create the dataset directory, download the dataset / uncompress there.
 * Train for 100 epochs 
-* You are running on the tx2, so the training will take less time than on the nano (which is what Dusty benchmarked on)
+* ResNet13 / Wide ResNet 50-2 Hint: review the [TorchVision model catalog](https://pytorch.org/docs/stable/torchvision/models.html)
+* Adjust batch size as necessary
 
-### Note:
-if you see the ```ImportError: cannot import name 'PILLOW_VERSION'``` error, downgrade it:
-```
-pip3 install Pillow==6.1%
-```
+
 ## To submit
-Please submit the time it took you to train the model along with the final accuracy top1/top5 that you were able to achieve. Could you increase the batch size? Why? How long did the training take you? Please save your trained model, we'll use it for the lab.
+Please submit the time it took you to train the model along with the final accuracy top1/top5 that you were able to achieve. Did you get better results with Wide ResNet50 or ResNet13? What training parameters you adjusted? Why? How long did the training take you? Please save your trained model, we'll use it for the lab. Also please review the architecture of the [Wide ResNet 50-2](https://pytorch.org/hub/pytorch_vision_wide_resnet/) network, we will discuss it in class.
 
 
 Credit / no credit only
