@@ -1,0 +1,5 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+172.31.39.129 ip-172-31-39-129.ec2.internal gpfs1
+172.31.36.168 ip-172-31-36-168.ec2.internal gpfs2
+172.31.41.137 ip-172-31-41-137.ec2.internal gpfs3

@@ -7,18 +7,18 @@
 
 1. SSH into each node (gpfs1, gpfs2, gpfs3) and proceed to install the requisites for LazyNLP installation
 ```
-  * yum install -y python3 python3-devel git wget unzip
-  * git clone https://github.com/chiphuyen/lazynlp.git
-  * cd lazynlp
-  * pip3 install -r requirements.txt
-  * pip3 install .
- ``` 
+yum install -y python3 python3-devel git wget unzip
+git clone https://github.com/chiphuyen/lazynlp.git
+cd lazynlp
+pip3 install -r requirements.txt
+pip3 install .
+``` 
 2. Download the [The WikiText language modeling dataset](https://www.salesforce.com/products/einstein/ai-research/the-wikitext-dependency-language-modeling-dataset/) into the mounted distributed gpfs file system
   ```
-  * cd /gpfs/gpfsfpo
-  * wget https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-103-v1.zip
-  * unzip wikitext-103-v1.zip
-  * rm -rf wikitext-103-v1.zip
+cd /gpfs/gpfsfpo
+wget https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-103-v1.zip
+unzip wikitext-103-v1.zip
+rm -rf wikitext-103-v1.zip
   ```
 3. Let's use LazyNLP to crawl a small (Gutenberg AUS) and medium (Gutenberg US) datasets.  Once you download the lists of urls below, you will need to modify the [crawler](https://github.com/MIDS-scaling-up/v2/blob/master/week12/hw/crawler.py) to point at these URL files.  Process the AUS file first. How long did it take? Now, kick off processing on the US file -- obviously, it will take a while, and by now, you should have a reasonable idea how long.
  ```
@@ -30,10 +30,10 @@
   ```
 4. Now, let's process a larger deduplicated collection of Reddit URLs. There are 163 separate URL files here, containing altogether 23M URLs. Your task is to download them all. Hint: you have three nodes and you can run many crawlers in parallel.
   ```
-  * # The reddit dataset
-  * pip install gdown
-  * gdown https://drive.google.com/uc?id=1hRtA3zZ0K5UHKOQ0_8d0BIc_1VyxgY51
-  * unzip reddit_urls.zip
+# The reddit dataset
+pip install gdown
+gdown https://drive.google.com/uc?id=1hRtA3zZ0K5UHKOQ0_8d0BIc_1VyxgY51
+unzip reddit_urls.zip
   ```
 5. If you run into weird "out of space" errors when clearly there's space, check your inode count:
 ```

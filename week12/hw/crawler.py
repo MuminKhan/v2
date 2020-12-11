@@ -8,14 +8,24 @@ def create_gutenberg():
     """ Uses a hard coded path to indicate the urls.txt file that serves to collect the data, 
         second parameter is the folder in the distributed storage where the datas is downloaded
     """
-    lazynlp.download_pages("/gpfs/gpfsfpo/aus_gutemberg/urls.txt", "/gpfs/gpfsfpo/aus_gutemberg_dataset", timeout=30, default_skip=True, extensions=[], domains=[])
-    pass
+    lazynlp.download_pages("/gpfs/gpfsfpo/aus_gut.urls", "/gpfs/gpfsfpo/aus_gutemberg_dataset", timeout=30, default_skip=True, extensions=[], domains=[])
+    lazynlp.download_pages("/gpfs/gpfsfpo/us_gutenberg.urls", "/gpfs/gpfsfpo/aus_gutemberg_dataset", timeout=30, default_skip=True, extensions=[], domains=[])
+    
 
 def create_reddit_data():
-    pass
+    path = '/gpfs/gpfsfpo/reddit_urls'
+    for f in os.listdir(path):
+        if '.txt' not in f:
+            continue    
+        
+        lazynlp.download_pages(os.path.join(path,f), "/gpfs/gpfsfpo/reddit", timeout=30, default_skip=True, extensions=[], domains=[])
+
 
 def create_wikipedia():
+    # url list 404's
     pass
+
+
 
 def filter_files(files, threshold=0.5, gran='word', n=8, capacity=100000000, error_rate=1e-7, header=0, interval=1000000):
     """ Include only files that has less than threshold n-gram overlapping with the current dataset
@@ -68,7 +78,7 @@ def partition(file, outfold, test_size=0.1, valid_size=0.1):
 
 def main():
     create_gutenberg()
-
+    create_reddit_data()
 
 if __name__ == '__main__':
     main()
