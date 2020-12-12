@@ -121,4 +121,6 @@ The results were better with the Wide ResNet50 rather than ResNet 18. The only p
 | Model             | Epochs | Training Time | Acc@1    | Acc@5  |
 | --------          | ------ | ------------- | ------   | ------ |
 | ResNet18          | 35     | ~3 hours      | 38.943   | 74.273 |
-| Wide ResNet 50-2  | 35     | ~14.5 hours   | STILL RUNNING   | STILL RUNNING |
+| Wide ResNet 50-2  | 20     | ~14.5 hours   | 27.048 - STILL RUNNING   | 61.410 STILL RUNNING |
+
+Note: It's past midnight and wide resnet50 is still training. Will check on it tomorrow morning. 
