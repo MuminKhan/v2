@@ -3,7 +3,17 @@
 Note: I moved the old `README.md` to [setup.md](setup.md) to take advantage of GH's markdown rendering for this submission. 
 
 1. How much disk space is used after step 4?
-    * Crawler is still running, will update
+```
+[root@ip-172-31-39-129 gpfsfpo]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        1.9G     0  1.9G   0% /dev
+tmpfs           1.9G     0  1.9G   0% /dev/shm
+tmpfs           1.9G   33M  1.9G   2% /run
+tmpfs           1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/xvda1      100G  6.4G   94G   7% /
+tmpfs           379M     0  379M   0% /run/user/1000
+gpfsfpo         300G  6.1G  294G   3% /gpfs/gpfsfpo
+```
 2. Did you parallelize the crawlers in step 4? If so, how? 
     * No, I did not
 3. Describe the steps to de-duplicate the web pages you crawled.
